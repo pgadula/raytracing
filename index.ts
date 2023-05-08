@@ -27,12 +27,12 @@ previousTimeStamp = 0;
 function animate() {
   drawer.shader(shaderFn);
 }
-animate();
 
 function step(timestampMs: number) {
   const elapsed = timestampMs - start;
   previousTimeStamp = elapsed;
   ctx.putImageData(image, 0, 0);
+  animate();
 
   frames++;
   if (elapsed >= 1000) {

@@ -9,11 +9,17 @@ import {
   Vector3,
   Vector4,
 } from './vector';
-const focalLength = 50;
+const focalLength = 55;
 const spheres: Sphere[] = [
   {
     pos: [1, 0, 2],
     radius: 0.5,
+    material: [255, 0, 0, 255],
+  },
+  {
+    pos: [0, 0, 2],
+    radius: 0.5,
+    material: [255, 255, 0, 255],
   },
 ];
 
@@ -29,9 +35,20 @@ export const shaderFn: PixelShaderFn = (color, coord, resolution) => {
 
 function trace(orgin: Vector3, direction: Vector3, depth = 4): any {
   for (let sphere of spheres) {
-    const intersection = sphereIntersection(orgin, direction, sphere);
+    const intersection = sphereIntersection(
+      orgin,
+      direction,
+      sphere
+    ) as Vector3;
     if (intersection) {
-      return [255, 0, 0, 255];
+      let color = sphere.material;
+      if (depth > 0) {
+        const ndir = normalize(subtractVectors(orgin, intersection)) as Vector3;
+        const nColor = trace(intersection, ndir, depth - 1);
+        color = addVectors(color, nColor) as Vector4;
+      }
+
+      return color;
     }
   }
 
@@ -41,11 +58,11 @@ function trace(orgin: Vector3, direction: Vector3, depth = 4): any {
 interface Sphere {
   pos: Vector3;
   radius: number;
+  material: Vector4;
 }
 function sphereIntersection(orgin: Vector3, dir: Vector3, sphere: Sphere) {
-  const directionNorm = normalize(dir);
   const sphereToOrigin = subtractVectors(orgin, sphere.pos);
-  const projection = dotProduct(sphereToOrigin, directionNorm);
+  const projection = dotProduct(sphereToOrigin, dir);
   const distance = magnitude(sphereToOrigin) - projection;
 
   const radiusSquared = sphere.radius * sphere.radius;
@@ -56,7 +73,7 @@ function sphereIntersection(orgin: Vector3, dir: Vector3, sphere: Sphere) {
   const offset = Math.sqrt(radiusSquared - distance * distance);
   const intersection = addVectors(
     orgin,
-    multiplyVectorByScalar(directionNorm, projection - offset)
+    multiplyVectorByScalar(dir, projection - offset)
   );
 
   return intersection;
