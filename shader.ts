@@ -9,11 +9,11 @@ import {
   Vector3,
   Vector4,
 } from './vector';
-const focalLength = 25;
+const focalLength = 50;
 const spheres: Sphere[] = [
   {
-    pos: [0, 0, 15],
-    radius: 5,
+    pos: [1, 0, 2],
+    radius: 0.5,
   },
 ];
 
@@ -22,7 +22,7 @@ export const shaderFn: PixelShaderFn = (color, coord, resolution) => {
   const max_y = resolution[1] - 1;
   const x = (coord[0] / max_x) * 2 - 1;
   const y = (coord[1] / max_y) * 2 - 1;
-  const direction = normalize([x, y, focalLength]) as Vector3;
+  const direction = normalize([x, y, -focalLength / 100]) as Vector3;
 
   return trace([0, 0, 0], direction);
 };
