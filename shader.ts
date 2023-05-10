@@ -23,7 +23,10 @@ const spheres: Sphere[] = [
   },
 ];
 
-export const shaderFn: PixelShaderFn = (color, coord, resolution) => {
+export const shaderFn: PixelShaderFn = (color, coord, resolution, mouse) => {
+  
+  spheres[0].pos[0] = mouse[0];
+  spheres[0].pos[1] = mouse[1];
   const max_x = resolution[0] - 1;
   const max_y = resolution[1] - 1;
   const x = (coord[0] / max_x) * 2 - 1;

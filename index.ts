@@ -14,10 +14,17 @@ const fpsElement: HTMLSpanElement = document.getElementById(
 //setup
 canvas.height = height;
 canvas.width = width;
+let ms = [0, 0];
+
+canvas.addEventListener('mousemove', (m) => {
+  const x = (m.x / width) * 2 - 1;
+  const y = (m.y / height) * 2 - 1;
+  ms = [x, y];
+});
 
 const ctx: CanvasRenderingContext2D = canvas.getContext('2d');
 const image = new ImageData(height, width);
-const drawer = createDrawer(image.data, [width, height]);
+const drawer = createDrawer(image.data, [width, height], ms);
 
 let start,
   previousTimeStamp,
@@ -46,7 +53,3 @@ function step(timestampMs: number) {
   requestAnimationFrame(step);
 }
 requestAnimationFrame(step);
-
-function randomIntFromInterval(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}

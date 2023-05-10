@@ -3,7 +3,8 @@ import { Vector2, Vector4 } from './vector';
 export type PixelShaderFn = (
   fragColor: Vector4,
   fragCoord: Vector2,
-  viewport: Vector2
+  viewport: Vector2,
+  mouse: Vector2
 ) => Vector4;
 
 const drawSphereFactor =
@@ -26,7 +27,11 @@ const drawSphereFactor =
       }
     }
   };
-function fragmentProgramFactor(pixels: Uint8ClampedArray, size: Vector2) {
+function fragmentProgramFactor(
+  pixels: Uint8ClampedArray,
+  size: Vector2,
+  mouse: Vector2
+) {
   return (fn: PixelShaderFn) => {
     for (let y = 0; y < size[1]; y++) {
       for (let x = 0; x < size[0]; x++) {
@@ -42,7 +47,7 @@ function fragmentProgramFactor(pixels: Uint8ClampedArray, size: Vector2) {
         ];
 
         const fragCoord: Vector2 = [x, y];
-        const result = fn(fragColor, fragCoord, size);
+        const result = fn(fragColor, fragCoord, size, mouse);
         pixels[index] = result[0];
         pixels[index + 1] = result[1];
         pixels[index + 2] = result[2];
@@ -52,7 +57,11 @@ function fragmentProgramFactor(pixels: Uint8ClampedArray, size: Vector2) {
   };
 }
 
-export const createDrawer = (pixels: Uint8ClampedArray, size: Vector2) => ({
+export const createDrawer = (
+  pixels: Uint8ClampedArray,
+  size: Vector2,
+  mouse: Vector2
+) => ({
   drawSphere: drawSphereFactor(pixels, size),
-  shader: fragmentProgramFactor(pixels, size),
+  shader: fragmentProgramFactor(pixels, size, mouse),
 });
