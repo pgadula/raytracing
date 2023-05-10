@@ -12,19 +12,18 @@ import {
 const focalLength = 55;
 const spheres: Sphere[] = [
   {
-    pos: [1, 0, 4],
+    pos: [1, 0, 1],
     radius: 0.5,
     material: [255, 0, 0, 255],
   },
   {
-    pos: [0, 0, 2],
-    radius: 1.0,
+    pos: [1, 0, 4],
+    radius: 1,
     material: [0, 255, 0, 255],
   },
 ];
 
 export const shaderFn: PixelShaderFn = (color, coord, resolution, mouse) => {
-  
   spheres[0].pos[0] = mouse[0];
   spheres[0].pos[1] = mouse[1];
   const max_x = resolution[0] - 1;

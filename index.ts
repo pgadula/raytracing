@@ -17,9 +17,10 @@ canvas.width = width;
 let ms = [0, 0];
 
 canvas.addEventListener('mousemove', (m) => {
-  const x = (m.x / width) * 2 - 1;
-  const y = (m.y / height) * 2 - 1;
-  ms = [x, y];
+  const x = (m.x / width) * -4 - 1;
+  const y = (m.y / height) * -4 - 1;
+  ms[0] = x;
+  ms[1] = y;
 });
 
 const ctx: CanvasRenderingContext2D = canvas.getContext('2d');
