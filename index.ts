@@ -5,6 +5,7 @@ import { shaderFn } from './shader';
 const height = 250;
 const width = 250;
 
+
 const canvas: HTMLCanvasElement = document.getElementById(
   'canvas'
 ) as HTMLCanvasElement;
