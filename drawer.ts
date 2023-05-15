@@ -48,9 +48,9 @@ function fragmentProgramFactor(
 
         const fragCoord: Vector2 = [x, y];
         const result = fn(fragColor, fragCoord, size, mouse);
-        pixels[index] = result[0];
-        pixels[index + 1] = result[1];
-        pixels[index + 2] = result[2];
+        pixels[index] = result[0] * 255;
+        pixels[index + 1] = result[1] * 255;
+        pixels[index + 2] = result[2] * 255;
         pixels[index + 3] = 255;
       }
     }

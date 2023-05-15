@@ -10,44 +10,37 @@ import {
   Vector3,
   Vector4,
 } from './vector';
-const focalLength = 95;
+const focalLength = 1;
 const spheres: Sphere[] = [
   {
-    pos: [1, 0, 1],
+    pos: [1, 2, 1],
     radius: 0.5,
-    emission: [255, 0, 0],
-    reflectivity: [0.5, 1, 1],
+    emission: [1, 1, 1],
+    reflectivity: [1, 1, 1],
   },
   {
     pos: [-1, 0, 2],
-    radius: 0.5,
-    emission: [155, 50, 0],
-    reflectivity: [0.5, 0, 0],
+    radius: 0.15,
+    emission: [0, 0.2, 0],
+    reflectivity: [1, 1, 1],
   },
   {
-    pos: [1, -1, 2],
-    radius: 0.5,
-    emission: [255, 255, 255],
-    reflectivity: [0.1, 0.1, 0.1],
-  },
-  {
-    pos: [1, 1.5, 2],
-    radius: 0.5,
-    emission: [0, 0, 255],
-    reflectivity: [1, 0.5, 1],
+    pos: [-2, -1, 2],
+    radius: 0.3,
+    emission: [0, 0.1, 0],
+    reflectivity: [0.5, 0.1, 0.1],
   },
 ];
 
 export const shaderFn: PixelShaderFn = (color, coord, resolution, mouse) => {
-  spheres[0].pos[0] = mouse[0];
-  spheres[0].pos[1] = mouse[1];
   const max_x = resolution[0] - 1;
   const max_y = resolution[1] - 1;
   const x = (coord[0] / max_x) * 2 - 1;
   const y = (coord[1] / max_y) * 2 - 1;
-  const direction = normalize([x, y, -focalLength / 100]) as Vector3;
+  const aspectRatio = resolution[0] / resolution[1];
+  const direction = normalize([x * aspectRatio, y, -focalLength]) as Vector3;
 
-  return trace([0, 0, -2], direction);
+  return trace([0, 0, -1], direction);
 };
 
 function trace(orgin: Vector3, direction: Vector3, depth = 8): any {
