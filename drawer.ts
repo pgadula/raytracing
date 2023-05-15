@@ -51,7 +51,7 @@ function fragmentProgramFactor(
         pixels[index] = result[0];
         pixels[index + 1] = result[1];
         pixels[index + 2] = result[2];
-        pixels[index + 3] = result[3];
+        pixels[index + 3] = 255;
       }
     }
   };

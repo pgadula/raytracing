@@ -3,23 +3,38 @@ import {
   addVectors,
   dotProduct,
   magnitude,
+  multiply,
   multiplyVectorByScalar,
   normalize,
   subtractVectors,
   Vector3,
   Vector4,
 } from './vector';
-const focalLength = 55;
+const focalLength = 95;
 const spheres: Sphere[] = [
   {
     pos: [1, 0, 1],
     radius: 0.5,
-    material: [255, 0, 0, 255],
+    emission: [255, 0, 0],
+    reflectivity: [0.5, 1, 1],
   },
   {
-    pos: [1, 0, 4],
-    radius: 1,
-    material: [0, 255, 0, 255],
+    pos: [-1, 0, 2],
+    radius: 0.5,
+    emission: [155, 50, 0],
+    reflectivity: [0.5, 0, 0],
+  },
+  {
+    pos: [1, -1, 2],
+    radius: 0.5,
+    emission: [255, 255, 255],
+    reflectivity: [0.1, 0.1, 0.1],
+  },
+  {
+    pos: [1, 1.5, 2],
+    radius: 0.5,
+    emission: [0, 0, 255],
+    reflectivity: [1, 0.5, 1],
   },
 ];
 
@@ -32,23 +47,26 @@ export const shaderFn: PixelShaderFn = (color, coord, resolution, mouse) => {
   const y = (coord[1] / max_y) * 2 - 1;
   const direction = normalize([x, y, -focalLength / 100]) as Vector3;
 
-  return trace([0, 0, 0], direction);
+  return trace([0, 0, -2], direction);
 };
 
-function trace(orgin: Vector3, direction: Vector3, depth = 4): any {
+function trace(orgin: Vector3, direction: Vector3, depth = 8): any {
   for (let sphere of spheres) {
     const intersection = sphereIntersection(orgin, direction, sphere);
     if (intersection) {
-      let color = sphere.material;
+      let emission = sphere.emission;
       if (depth >= 0) {
         const newdir = normalize(
           subtractVectors(intersection, orgin)
         ) as Vector3;
-        const reflectedColor = trace(intersection, newdir, depth - 1);
-        color = addVectors(color, reflectedColor) as Vector4;
+        const reflectedColor = multiply(
+          trace(intersection, newdir, depth - 1),
+          sphere.reflectivity
+        );
+        emission = addVectors(emission, reflectedColor) as Vector3;
       }
 
-      return color;
+      return emission;
     }
   }
 
@@ -58,7 +76,8 @@ function trace(orgin: Vector3, direction: Vector3, depth = 4): any {
 interface Sphere {
   pos: Vector3;
   radius: number;
-  material: Vector4;
+  emission: Vector3;
+  reflectivity: Vector3;
 }
 function sphereIntersection(
   orgin: Vector3,

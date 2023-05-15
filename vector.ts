@@ -16,6 +16,10 @@ export function multiplyVectorByScalar(v: Vector, s: number): Vector {
   return v.map((val) => val * s);
 }
 
+export function multiply(v: Vector, v2: Vector): Vector {
+  return v.map((val, i) => val * v2[i]);
+}
+
 export function dotProduct(v1: Vector, v2: Vector): number {
   return v1.reduce((sum, val, index) => sum + val * v2[index], 0);
 }
