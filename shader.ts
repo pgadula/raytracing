@@ -11,24 +11,31 @@ import {
   Vector4,
 } from './vector';
 const focalLength = 1;
+const maxDepth = 50;
 const spheres: Sphere[] = [
   {
-    pos: [1, 2, 1],
+    pos: [-1, 1, -3],
     radius: 0.5,
-    emission: [1, 1, 1],
+    emission: [1, 0, 0],
     reflectivity: [1, 1, 1],
   },
   {
-    pos: [-1, 0, 2],
-    radius: 0.15,
-    emission: [0, 0.2, 0],
+    pos: [6, 5, 9],
+    radius: 0.9,
+    emission: [0, 1, 1],
     reflectivity: [1, 1, 1],
   },
   {
     pos: [-2, -1, 2],
-    radius: 0.3,
-    emission: [0, 0.1, 0],
-    reflectivity: [0.5, 0.1, 0.1],
+    radius: 0.2,
+    emission: [0, 0, 0],
+    reflectivity: [0.1, 0.1, 0.1],
+  },
+  {
+    pos: [-0.8, -1, 2],
+    radius: 0.2,
+    emission: [0, 0, 0],
+    reflectivity: [0.1, 0.1, 0.1],
   },
 ];
 
@@ -40,10 +47,10 @@ export const shaderFn: PixelShaderFn = (color, coord, resolution, mouse) => {
   const aspectRatio = resolution[0] / resolution[1];
   const direction = normalize([x * aspectRatio, y, -focalLength]) as Vector3;
 
-  return trace([0, 0, -1], direction);
+  return trace([0, 0, -1], direction, maxDepth);
 };
 
-function trace(orgin: Vector3, direction: Vector3, depth = 8): any {
+function trace(orgin: Vector3, direction: Vector3, depth): any {
   for (let sphere of spheres) {
     const intersection = sphereIntersection(orgin, direction, sphere);
     if (intersection) {
