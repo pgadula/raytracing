@@ -5,7 +5,7 @@ export type PixelShaderFn = (
   fragCoord: Vector2,
   viewport: Vector2,
   mouse: Vector2
-) => Vector4;
+) => Vector3;
 
 const drawSphereFactor =
   (pixels: Uint8ClampedArray, size: Vector2) =>
