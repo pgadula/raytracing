@@ -11,7 +11,8 @@ import {
   Vector4,
 } from './vector';
 const focalLength = 1;
-const maxDepth = 4;
+const maxDepth = 36;
+const scale = 50000;
 const spheres: Sphere[] = [
   {
     pos: [-1, 1, -3],
@@ -23,23 +24,23 @@ const spheres: Sphere[] = [
   {
     pos: [6, 5, 9],
     radius: 0.9,
-    emission: [0, 1, 1],
+    emission: [1, 1, 1],
     reflectivity: [1, 1, 1],
-    roughness: 2,
+    roughness: 5,
   },
   {
     pos: [-2, -1, 2],
     radius: 0.2,
     emission: [0, 0, 0],
-    reflectivity: [0.1, 0.1, 0.1],
+    reflectivity: [1, 1, 1],
     roughness: 5,
   },
   {
     pos: [-0.8, -1, 2],
     radius: 0.2,
     emission: [0, 0, 0],
-    reflectivity: [0.1, 0.1, 0.1],
-    roughness: 1,
+    reflectivity: [1, 1, 1],
+    roughness: 50,
   },
 ];
 
@@ -52,7 +53,7 @@ export const shaderFn: PixelShaderFn = (color, coord, resolution, mouse) => {
   const direction = normalize([x * aspectRatio, y, -focalLength]) as Vector3;
   const newColor = multiplyVectorByScalar(
     trace([0, 0, -1], direction, maxDepth),
-    1 / 500
+    1 / scale
   ) as Vector3;
   return addVectors(color, newColor) as Vector3;
 };
