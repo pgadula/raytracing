@@ -10,37 +10,43 @@ import {
   Vector3,
   Vector4,
 } from './vector';
-const focalLength = 1;
-const maxDepth = 36;
-const scale = 50000;
+interface Sphere {
+  pos: Vector3;
+  radius: number;
+  emission: Vector3;
+  reflectivity: Vector3;
+  roughness: number;
+}
+interface Intersection {
+  point: Vector3;
+  normal: Vector3;
+}
+
+const focalLength = 0.55;
+const maxDepth = 15;
+const scale = 500;
 const spheres: Sphere[] = [
   {
-    pos: [-1, 1, -3],
-    radius: 0.5,
-    emission: [1, 0, 0],
+    pos: [0, 0, 10],
+    radius: 1,
+    emission: [1, 1, 1],
     reflectivity: [1, 1, 1],
     roughness: 1,
   },
   {
-    pos: [6, 5, 9],
-    radius: 0.9,
-    emission: [1, 1, 1],
-    reflectivity: [1, 1, 1],
-    roughness: 5,
-  },
-  {
-    pos: [-2, -1, 2],
-    radius: 0.2,
+    pos: [10, 0, 10],
+    radius: 1,
     emission: [0, 0, 0],
-    reflectivity: [1, 1, 1],
-    roughness: 5,
+    reflectivity: [0.5, 0.5, 0.5],
+    roughness: 1,
   },
+
   {
-    pos: [-0.8, -1, 2],
-    radius: 0.2,
-    emission: [0, 0, 0],
-    reflectivity: [1, 1, 1],
-    roughness: 50,
+    pos: [0, 0, -50],
+    radius: 2,
+    emission: [1, 0, 0],
+    reflectivity: [0.5, 0.5, 0.5],
+    roughness: 1,
   },
 ];
 
@@ -52,13 +58,13 @@ export const shaderFn: PixelShaderFn = (color, coord, resolution, mouse) => {
   const aspectRatio = resolution[0] / resolution[1];
   const direction = normalize([x * aspectRatio, y, -focalLength]) as Vector3;
   const newColor = multiplyVectorByScalar(
-    trace([0, 0, -1], direction, maxDepth),
+    trace([0, 0, 0], direction, maxDepth, spheres),
     1 / scale
   ) as Vector3;
   return addVectors(color, newColor) as Vector3;
 };
 
-function trace(orgin: Vector3, direction: Vector3, depth): any {
+function trace(orgin: Vector3, direction: Vector3, depth, spheres): any {
   for (let sphere of spheres) {
     const intersectionResult = sphereIntersection(orgin, direction, sphere);
     if (intersectionResult) {
@@ -66,7 +72,12 @@ function trace(orgin: Vector3, direction: Vector3, depth): any {
       if (depth >= 0) {
         const newdir = intersectionResult.normal;
         const reflectedColor = multiply(
-          trace(intersectionResult.point, newdir, depth - 1),
+          trace(
+            intersectionResult.point,
+            newdir,
+            depth - 1,
+            spheres.filter((x) => x != sphere)
+          ),
           sphere.reflectivity
         );
         emission = addVectors(emission, reflectedColor) as Vector3;
@@ -79,17 +90,6 @@ function trace(orgin: Vector3, direction: Vector3, depth): any {
   return [0, 0, 0, 255];
 }
 
-interface Sphere {
-  pos: Vector3;
-  radius: number;
-  emission: Vector3;
-  reflectivity: Vector3;
-  roughness: number;
-}
-interface Intersection {
-  point: Vector3;
-  normal: Vector3;
-}
 function sphereIntersection(
   orgin: Vector3,
   dir: Vector3,
