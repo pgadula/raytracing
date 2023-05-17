@@ -24,43 +24,59 @@ interface Intersection {
 
 interface Camera {
   pos: Vector3;
+  fov: number;
+  focalLength: number;
 }
 
-const focalLength = 0.3;
-const maxDepth = 15;
-const scale = 500;
+const maxDepth = 55;
+const scale = 100;
 const spheres: Sphere[] = [
   {
-    pos: [1, 0, 10],
-    radius: 1,
+    pos: [1, 10, 20],
+    radius: 0.3,
     emission: [1, 1, 1],
     reflectivity: [1, 1, 1],
     roughness: 1,
   },
   {
-    pos: [10, 0, 10],
-    radius: 1,
+    pos: [0, 0, 1],
+    radius: 0.2,
     emission: [0, 0, 0],
-    reflectivity: [1, 1, 1],
-    roughness: 1,
+    reflectivity: [0.3, 0.1, 0.1],
+    roughness: 55,
   },
 ];
 const camera: Camera = {
-  pos: [0, 0, 0],
+  pos: [0, 0, -1],
+  fov: 60,
+  focalLength: 0.55,
 };
 export const shaderFn: PixelShaderFn = (color, coord, resolution, mouse) => {
   const max_x = resolution[0] - 1;
   const max_y = resolution[1] - 1;
-  const x = (coord[0] / max_x) * 2 - 1;
-  const y = (coord[1] / max_y) * 2 - 1;
   const aspectRatio = resolution[0] / resolution[1];
-  const direction = normalize([x * aspectRatio, y, -focalLength]) as Vector3;
+
+  // Calculate the normalized device coordinates (NDC) within the range [-1, 1]
+  const ndcX = (coord[0] / max_x) * 2 - 1;
+  const ndcY = (coord[1] / max_y) * 2 - 1;
+
+  // Convert FOV to radians and calculate the half-width and half-height of the near plane
+  const fovRadians = (camera.fov * Math.PI) / 180;
+  const halfHeight = Math.tan(fovRadians / 2);
+  const halfWidth = aspectRatio * halfHeight;
+
+  // Calculate the direction vector
+  const direction = normalize([
+    ndcX * halfWidth,
+    ndcY * halfHeight,
+    -camera.focalLength,
+  ]) as Vector3;
+
   const tracedColor = trace(camera.pos, direction, maxDepth, spheres);
   const newColor = multiplyVectorByScalar(tracedColor, 1 / scale) as Vector3;
   return addVectors(color, newColor) as Vector3;
 };
-
-function trace(orgin: Vector3, direction: Vector3, depth, spheres): any {
+function trace(orgin: Vector3, direction: Vector3, depth, spheres): Vector3 {
   for (let sphere of spheres) {
     const intersectionResult = sphereIntersection(orgin, direction, sphere);
     if (intersectionResult) {
@@ -83,7 +99,7 @@ function trace(orgin: Vector3, direction: Vector3, depth, spheres): any {
     }
   }
 
-  return [0, 0, 0, 255];
+  return [0, 0, 0];
 }
 
 function sphereIntersection(
