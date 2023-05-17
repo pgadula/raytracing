@@ -10,28 +10,30 @@ import {
   Vector3,
   Vector4,
 } from './vector';
-interface Sphere {
-  pos: Vector3;
-  radius: number;
-  emission: Vector3;
-  reflectivity: Vector3;
-  roughness: number;
-}
-interface Intersection {
-  point: Vector3;
-  normal: Vector3;
-}
-
-interface Camera {
-  pos: Vector3;
-  fov: number;
-  focalLength: number;
-}
+import {
+  Camera,
+  Intersection,
+  IntersectionResult,
+  Object3d,
+  Plane,
+  Sphere,
+} from './definitions';
 
 const maxDepth = 55;
 const scale = 100;
+const planes: Plane[] = [
+  {
+    type: 'plane',
+    pos: [0, -1, 0],
+    normal: [0, 1, 0],
+    emission: [0, 0, 0],
+    reflectivity: [1, 1, 1],
+    roughness: 1,
+  },
+];
 const spheres: Sphere[] = [
   {
+    type: 'sphere',
     pos: [1, 10, 20],
     radius: 0.3,
     emission: [1, 1, 1],
@@ -39,13 +41,15 @@ const spheres: Sphere[] = [
     roughness: 1,
   },
   {
+    type: 'sphere',
     pos: [0, 0, 1],
     radius: 0.2,
     emission: [0, 0, 0],
     reflectivity: [0.3, 0.1, 0.1],
-    roughness: 55,
+    roughness: 2,
   },
 ];
+const objects3d: Array<Object3d> = [...spheres, ...planes];
 const camera: Camera = {
   pos: [0, 0, -1],
   fov: 60,
@@ -72,15 +76,30 @@ export const shaderFn: PixelShaderFn = (color, coord, resolution, mouse) => {
     -camera.focalLength,
   ]) as Vector3;
 
-  const tracedColor = trace(camera.pos, direction, maxDepth, spheres);
+  const tracedColor = trace(camera.pos, direction, maxDepth, objects3d);
   const newColor = multiplyVectorByScalar(tracedColor, 1 / scale) as Vector3;
   return addVectors(color, newColor) as Vector3;
 };
-function trace(orgin: Vector3, direction: Vector3, depth, spheres): Vector3 {
-  for (let sphere of spheres) {
-    const intersectionResult = sphereIntersection(orgin, direction, sphere);
+function trace(
+  orgin: Vector3,
+  direction: Vector3,
+  depth: number,
+  objects: Object3d[]
+): Vector3 {
+  for (let object of objects) {
+    let intersectionResult = null;
+
+    switch (object.type) {
+      case 'sphere':
+        intersectionResult = sphereIntersection(orgin, direction, object);
+        break;
+      case 'plane':
+        intersectionResult = planeIntersection(orgin, direction, object);
+        break;
+    }
+
     if (intersectionResult) {
-      let emission = sphere.emission;
+      let emission = object.emission;
       if (depth >= 0) {
         const newdir = intersectionResult.normal;
         const reflectedColor = multiply(
@@ -88,9 +107,9 @@ function trace(orgin: Vector3, direction: Vector3, depth, spheres): Vector3 {
             intersectionResult.point,
             newdir,
             depth - 1,
-            spheres.filter((x) => x != sphere)
+            objects3d.filter((x) => x != object)
           ),
-          sphere.reflectivity
+          object.reflectivity
         );
         emission = addVectors(emission, reflectedColor) as Vector3;
       }
@@ -106,7 +125,7 @@ function sphereIntersection(
   orgin: Vector3,
   dir: Vector3,
   sphere: Sphere
-): Intersection | null {
+): IntersectionResult {
   const sphereToOrigin = subtractVectors(orgin, sphere.pos);
   const projection = dotProduct(sphereToOrigin, dir);
   const distance = magnitude(sphereToOrigin) - projection;
@@ -132,6 +151,38 @@ function sphereIntersection(
     normal,
   };
 }
+
+function planeIntersection(
+  origin: Vector3,
+  direction: Vector3,
+  plane: Plane
+): Intersection | null {
+  const dotProductResult = dotProduct(plane.normal, direction);
+
+  if (Math.abs(dotProductResult) < 0.01) {
+    return null;
+  }
+
+  const t =
+    dotProduct(subtractVectors(plane.pos, origin), plane.normal) /
+    dotProduct(direction, plane.normal);
+
+  if (t < 0) {
+    return null; // Intersection point is behind the ray's origin
+  }
+
+  const intersectionPoint = addVectors(
+    origin,
+    multiplyVectorByScalar(direction, t)
+  ) as Vector3;
+  const normal = plane.normal;
+
+  return {
+    point: intersectionPoint,
+    normal: normal,
+  };
+}
+
 function getRandomUnitVector() {
   const x = Math.random() * 2 - 1;
   const y = Math.random() * 2 - 1;
