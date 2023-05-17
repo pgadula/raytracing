@@ -1,4 +1,4 @@
-import { Vector2, Vector4 } from './vector';
+import { Vector2, Vector3, Vector4 } from './vector';
 
 export type PixelShaderFn = (
   fragColor: Vector4,

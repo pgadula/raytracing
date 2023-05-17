@@ -22,12 +22,16 @@ interface Intersection {
   normal: Vector3;
 }
 
-const focalLength = 0.55;
+interface Camera {
+  pos: Vector3;
+}
+
+const focalLength = 0.3;
 const maxDepth = 15;
 const scale = 500;
 const spheres: Sphere[] = [
   {
-    pos: [0, 0, 10],
+    pos: [1, 0, 10],
     radius: 1,
     emission: [1, 1, 1],
     reflectivity: [1, 1, 1],
@@ -37,19 +41,13 @@ const spheres: Sphere[] = [
     pos: [10, 0, 10],
     radius: 1,
     emission: [0, 0, 0],
-    reflectivity: [0.5, 0.5, 0.5],
-    roughness: 1,
-  },
-
-  {
-    pos: [0, 0, -50],
-    radius: 2,
-    emission: [1, 0, 0],
-    reflectivity: [0.5, 0.5, 0.5],
+    reflectivity: [1, 1, 1],
     roughness: 1,
   },
 ];
-
+const camera: Camera = {
+  pos: [0, 0, 0],
+};
 export const shaderFn: PixelShaderFn = (color, coord, resolution, mouse) => {
   const max_x = resolution[0] - 1;
   const max_y = resolution[1] - 1;
@@ -57,10 +55,8 @@ export const shaderFn: PixelShaderFn = (color, coord, resolution, mouse) => {
   const y = (coord[1] / max_y) * 2 - 1;
   const aspectRatio = resolution[0] / resolution[1];
   const direction = normalize([x * aspectRatio, y, -focalLength]) as Vector3;
-  const newColor = multiplyVectorByScalar(
-    trace([0, 0, 0], direction, maxDepth, spheres),
-    1 / scale
-  ) as Vector3;
+  const tracedColor = trace(camera.pos, direction, maxDepth, spheres);
+  const newColor = multiplyVectorByScalar(tracedColor, 1 / scale) as Vector3;
   return addVectors(color, newColor) as Vector3;
 };
 
