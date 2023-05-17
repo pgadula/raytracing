@@ -19,7 +19,7 @@ export interface Sphere {
 }
 export type Object3d = Sphere | Plane;
 
-export interface Intersection {
+interface Intersection {
   point: Vector3;
   normal: Vector3;
 }

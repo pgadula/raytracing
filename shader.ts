@@ -20,36 +20,47 @@ import {
 } from './definitions';
 
 const maxDepth = 55;
-const scale = 100;
+const scale = 300;
 const planes: Plane[] = [
   {
     type: 'plane',
-    pos: [0, -1, 0],
-    normal: [0, 1, 0],
+    pos: [0, 1, 0],
+    normal: [0, -1, 0],
     emission: [0, 0, 0],
     reflectivity: [1, 1, 1],
-    roughness: 1,
+    roughness: 5,
   },
 ];
 const spheres: Sphere[] = [
   {
     type: 'sphere',
-    pos: [1, 10, 20],
-    radius: 0.3,
-    emission: [1, 1, 1],
-    reflectivity: [1, 1, 1],
+    pos: [-1, 0, 1],
+    radius: 0.2,
+    emission: [0.5, 0, 0],
+    reflectivity: [0.1, 0.4, 0.4],
     roughness: 1,
   },
   {
     type: 'sphere',
-    pos: [0, 0, 1],
+    pos: [1, 0, 1],
     radius: 0.2,
-    emission: [0, 0, 0],
-    reflectivity: [0.3, 0.1, 0.1],
-    roughness: 2,
+    emission: [0, 0, 0.5],
+    reflectivity: [0.1, 0.4, 0.4],
+    roughness: 1,
+  },
+  {
+    type: 'sphere',
+    pos: [0, 5, 1],
+    radius: 1,
+    emission: [0.5, 0.5, 0.5],
+    reflectivity: [1, 1, 0],
+    roughness: 1,
   },
 ];
-const objects3d: Array<Object3d> = [...spheres, ...planes];
+const objects3d: Array<Object3d> = [
+  ...spheres.sort((a, b) => b.pos[2] - a.pos[2]),
+  ...planes,
+];
 const camera: Camera = {
   pos: [0, 0, -1],
   fov: 60,
@@ -87,7 +98,7 @@ function trace(
   objects: Object3d[]
 ): Vector3 {
   for (let object of objects) {
-    let intersectionResult = null;
+    let intersectionResult: IntersectionResult;
 
     switch (object.type) {
       case 'sphere':
@@ -156,7 +167,7 @@ function planeIntersection(
   origin: Vector3,
   direction: Vector3,
   plane: Plane
-): Intersection | null {
+): IntersectionResult {
   const dotProductResult = dotProduct(plane.normal, direction);
 
   if (Math.abs(dotProductResult) < 0.01) {
@@ -175,7 +186,12 @@ function planeIntersection(
     origin,
     multiplyVectorByScalar(direction, t)
   ) as Vector3;
-  const normal = plane.normal;
+  let roughness = multiplyVectorByScalar(
+    getRandomUnitVector(),
+    plane.roughness
+  ) as Vector3;
+  let normal = normalize(subtractVectors(intersectionPoint, origin)) as Vector3;
+  normal = addVectors(normal, roughness) as Vector3;
 
   return {
     point: intersectionPoint,
