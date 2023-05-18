@@ -12,7 +12,6 @@ import {
 } from './vector';
 import {
   Camera,
-  Intersection,
   IntersectionResult,
   Object3d,
   Plane,
@@ -20,7 +19,7 @@ import {
 } from './definitions';
 
 const maxDepth = 55;
-const scale = 300;
+const scale = 100;
 const planes: Plane[] = [
   {
     type: 'plane',
@@ -36,8 +35,8 @@ const spheres: Sphere[] = [
     type: 'sphere',
     pos: [-1, 0, 1],
     radius: 0.2,
-    emission: [0.5, 0, 0],
-    reflectivity: [0.1, 0.4, 0.4],
+    emission: [0.1, 0.1, 0.1],
+    reflectivity: [0, 0, 0],
     roughness: 1,
   },
   {
@@ -52,8 +51,8 @@ const spheres: Sphere[] = [
     type: 'sphere',
     pos: [0, 5, 1],
     radius: 1,
-    emission: [0.5, 0.5, 0.5],
-    reflectivity: [1, 1, 0],
+    emission: [0, 0, 0],
+    reflectivity: [1, 1, 1],
     roughness: 1,
   },
 ];
@@ -152,7 +151,7 @@ function sphereIntersection(
     multiplyVectorByScalar(dir, projection - offset)
   ) as Vector3;
   let roughness = multiplyVectorByScalar(
-    getRandomUnitVector(),
+    getRandomUnitVector(dir),
     sphere.roughness
   ) as Vector3;
   let normal = normalize(subtractVectors(intersection, orgin)) as Vector3;
@@ -187,7 +186,7 @@ function planeIntersection(
     multiplyVectorByScalar(direction, t)
   ) as Vector3;
   let roughness = multiplyVectorByScalar(
-    getRandomUnitVector(),
+    getRandomUnitVector(direction),
     plane.roughness
   ) as Vector3;
   let normal = normalize(subtractVectors(intersectionPoint, origin)) as Vector3;
@@ -199,10 +198,14 @@ function planeIntersection(
   };
 }
 
-function getRandomUnitVector() {
+function getRandomUnitVector(dir) {
   const x = Math.random() * 2 - 1;
   const y = Math.random() * 2 - 1;
   const z = Math.random() * 2 - 1;
-  const vector = [x, y, z];
+  let vector = [x, y, z];
+  const d = dotProduct(vector, dir);
+  if (d < 0) {
+    vector = multiplyVectorByScalar(vector, -1);
+  }
   return normalize(vector);
 }
