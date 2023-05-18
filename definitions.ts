@@ -29,3 +29,8 @@ export interface Camera {
   fov: number;
   focalLength: number;
 }
+
+export type Ray = {
+  direction: Vector3;
+  origin: Vector3;
+};

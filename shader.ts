@@ -15,11 +15,12 @@ import {
   IntersectionResult,
   Object3d,
   Plane,
+  Ray,
   Sphere,
 } from './definitions';
 
-const maxDepth = 55;
-const scale = 100;
+const maxDepth = 36;
+const scale = 300;
 const planes: Plane[] = [
   {
     type: 'plane',
@@ -27,7 +28,7 @@ const planes: Plane[] = [
     normal: [0, -1, 0],
     emission: [0, 0, 0],
     reflectivity: [1, 1, 1],
-    roughness: 5,
+    roughness: 55,
   },
 ];
 const spheres: Sphere[] = [
@@ -35,23 +36,23 @@ const spheres: Sphere[] = [
     type: 'sphere',
     pos: [-1, 0, 1],
     radius: 0.2,
-    emission: [0.1, 0.1, 0.1],
-    reflectivity: [0, 0, 0],
+    emission: [0, 0, 0],
+    reflectivity: [0.5, 0.5, 0.5],
     roughness: 1,
   },
   {
     type: 'sphere',
     pos: [1, 0, 1],
     radius: 0.2,
-    emission: [0, 0, 0.5],
-    reflectivity: [0.1, 0.4, 0.4],
+    emission: [0, 0, 0],
+    reflectivity: [0.8, 0, 0],
     roughness: 1,
   },
   {
     type: 'sphere',
-    pos: [0, 5, 1],
-    radius: 1,
-    emission: [0, 0, 0],
+    pos: [0, 5, 14],
+    radius: 0.3,
+    emission: [0.5, 0.5, 0.5],
     reflectivity: [1, 1, 1],
     roughness: 1,
   },
@@ -85,37 +86,36 @@ export const shaderFn: PixelShaderFn = (color, coord, resolution, mouse) => {
     ndcY * halfHeight,
     -camera.focalLength,
   ]) as Vector3;
-
-  const tracedColor = trace(camera.pos, direction, maxDepth, objects3d);
+  const ray: Ray = {
+    direction,
+    origin: camera.pos,
+  };
+  const tracedColor = trace(ray, maxDepth, objects3d);
   const newColor = multiplyVectorByScalar(tracedColor, 1 / scale) as Vector3;
   return addVectors(color, newColor) as Vector3;
 };
-function trace(
-  orgin: Vector3,
-  direction: Vector3,
-  depth: number,
-  objects: Object3d[]
-): Vector3 {
+function trace(ray: Ray, depth: number, objects: Object3d[]): Vector3 {
   for (let object of objects) {
     let intersectionResult: IntersectionResult;
-
     switch (object.type) {
       case 'sphere':
-        intersectionResult = sphereIntersection(orgin, direction, object);
+        intersectionResult = sphereIntersection(ray, object);
         break;
       case 'plane':
-        intersectionResult = planeIntersection(orgin, direction, object);
+        intersectionResult = planeIntersection(ray, object);
         break;
     }
 
     if (intersectionResult) {
       let emission = object.emission;
       if (depth >= 0) {
-        const newdir = intersectionResult.normal;
+        const newRay: Ray = {
+          origin: intersectionResult.point,
+          direction: intersectionResult.normal,
+        };
         const reflectedColor = multiply(
           trace(
-            intersectionResult.point,
-            newdir,
+            newRay,
             depth - 1,
             objects3d.filter((x) => x != object)
           ),
@@ -131,13 +131,9 @@ function trace(
   return [0, 0, 0];
 }
 
-function sphereIntersection(
-  orgin: Vector3,
-  dir: Vector3,
-  sphere: Sphere
-): IntersectionResult {
-  const sphereToOrigin = subtractVectors(orgin, sphere.pos);
-  const projection = dotProduct(sphereToOrigin, dir);
+function sphereIntersection(ray: Ray, sphere: Sphere): IntersectionResult {
+  const sphereToOrigin = subtractVectors(ray.origin, sphere.pos);
+  const projection = dotProduct(sphereToOrigin, ray.direction);
   const distance = magnitude(sphereToOrigin) - projection;
 
   const radiusSquared = sphere.radius * sphere.radius;
@@ -147,14 +143,14 @@ function sphereIntersection(
 
   const offset = Math.sqrt(radiusSquared - distance * distance);
   const intersection = addVectors(
-    orgin,
-    multiplyVectorByScalar(dir, projection - offset)
+    ray.origin,
+    multiplyVectorByScalar(ray.direction, projection - offset)
   ) as Vector3;
   let roughness = multiplyVectorByScalar(
-    getRandomUnitVector(dir),
+    getRandomUnitVector(ray.direction),
     sphere.roughness
   ) as Vector3;
-  let normal = normalize(subtractVectors(intersection, orgin)) as Vector3;
+  let normal = normalize(subtractVectors(intersection, ray.origin)) as Vector3;
   normal = addVectors(normal, roughness) as Vector3;
   return {
     point: intersection,
@@ -162,34 +158,32 @@ function sphereIntersection(
   };
 }
 
-function planeIntersection(
-  origin: Vector3,
-  direction: Vector3,
-  plane: Plane
-): IntersectionResult {
-  const dotProductResult = dotProduct(plane.normal, direction);
+function planeIntersection(ray: Ray, plane: Plane): IntersectionResult {
+  const dotProductResult = dotProduct(plane.normal, ray.direction);
 
   if (Math.abs(dotProductResult) < 0.01) {
     return null;
   }
 
   const t =
-    dotProduct(subtractVectors(plane.pos, origin), plane.normal) /
-    dotProduct(direction, plane.normal);
+    dotProduct(subtractVectors(plane.pos, ray.origin), plane.normal) /
+    dotProduct(ray.direction, plane.normal);
 
   if (t < 0) {
     return null; // Intersection point is behind the ray's origin
   }
 
   const intersectionPoint = addVectors(
-    origin,
-    multiplyVectorByScalar(direction, t)
+    ray.origin,
+    multiplyVectorByScalar(ray.direction, t)
   ) as Vector3;
   let roughness = multiplyVectorByScalar(
-    getRandomUnitVector(direction),
+    getRandomUnitVector(ray.direction),
     plane.roughness
   ) as Vector3;
-  let normal = normalize(subtractVectors(intersectionPoint, origin)) as Vector3;
+  let normal = normalize(
+    subtractVectors(intersectionPoint, ray.origin)
+  ) as Vector3;
   normal = addVectors(normal, roughness) as Vector3;
 
   return {
