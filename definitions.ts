@@ -7,6 +7,7 @@ export interface Plane {
   reflectivity: Vector3;
   roughness: number;
   normal: Vector3;
+  reflectionStrength: number;
 }
 
 export interface Sphere {
@@ -16,6 +17,7 @@ export interface Sphere {
   emission: Vector3;
   reflectivity: Vector3;
   roughness: number;
+  reflectionStrength: number;
 }
 export type Object3d = Sphere | Plane;
 

@@ -21,41 +21,45 @@ import {
 } from './definitions';
 
 const maxDepth = 5;
-const scale = 300;
+const scale = 10;
 const planes: Plane[] = [
-  {
-    type: 'plane',
-    pos: [0, 1, 0],
-    normal: [0, -1, 0],
-    emission: [0, 0, 0],
-    reflectivity: [1, 1, 1],
-    roughness: 1,
-  },
+  // {
+  //   type: 'plane',
+  //   pos: [0, 1, 0],
+  //   normal: [0, -1, 0],
+  //   emission: [0, 0, 0],
+  //   reflectivity: [0.5, 0.5, 0.5],
+  //   roughness: 1,
+  //   reflectionStrength: 0.5,
+  // },
 ];
 const spheres: Sphere[] = [
   {
     type: 'sphere',
-    pos: [-0.5, 0, 3],
+    pos: [-0.5, 0, 0],
+    radius: 0.2,
+    emission: [0, 0, 0],
+    reflectivity: [0.8, 0.5, 0.5],
+    roughness: 1,
+    reflectionStrength: 0.9,
+  },
+  {
+    type: 'sphere',
+    pos: [0, 0, 0],
     radius: 0.2,
     emission: [0, 0, 0],
     reflectivity: [0.5, 0.5, 0.5],
     roughness: 1,
+    reflectionStrength: 0.9,
   },
   {
     type: 'sphere',
-    pos: [0, 0, 3],
-    radius: 0.2,
-    emission: [0, 0, 0],
-    reflectivity: [0.4, 0, 0],
-    roughness: 1,
-  },
-  {
-    type: 'sphere',
-    pos: [0, 5, 10],
+    pos: [0, 8, 10],
     radius: 0.3,
-    emission: [0.5, 0.5, 0.5],
+    emission: [1, 0.5, 0.5],
     reflectivity: [1, 1, 1],
     roughness: 1,
+    reflectionStrength: 0.5,
   },
 ];
 const objects3d: Array<Object3d> = [
@@ -64,8 +68,8 @@ const objects3d: Array<Object3d> = [
 ];
 const camera: Camera = {
   pos: [0, 0, -1],
-  fov: 60,
-  focalLength: 0.55,
+  fov: 90,
+  focalLength: 0.5,
 };
 export const shaderFn: PixelShaderFn = (color, coord, resolution, mouse) => {
   const max_x = resolution[0] - 1;
@@ -114,13 +118,17 @@ function trace(ray: Ray, depth: number, objects: Object3d[]): Vector3 {
           origin: intersectionResult.point,
           direction: intersectionResult.normal,
         };
-        const reflectedColor = multiply(
+        let reflectedColor = multiply(
           trace(
             newRay,
             depth - 1,
             objects3d.filter((x) => x != object)
           ),
           object.reflectivity
+        );
+        reflectedColor = multiplyVectorByScalar(
+          reflectedColor,
+          object.reflectionStrength
         );
         emission = addVectors(emission, reflectedColor) as Vector3;
       }
