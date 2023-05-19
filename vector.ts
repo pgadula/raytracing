@@ -32,3 +32,9 @@ export function normalize(v: Vector): Vector {
   const mag = magnitude(v);
   return v.map((val) => val / mag);
 }
+export function sign(x: number): 0 | 1 | -1 {
+  if (x === 0) {
+    return 0;
+  }
+  return x > 0 ? 1 : -1;
+}

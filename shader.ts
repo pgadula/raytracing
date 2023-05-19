@@ -6,6 +6,7 @@ import {
   multiply,
   multiplyVectorByScalar,
   normalize,
+  sign,
   subtractVectors,
   Vector3,
   Vector4,
@@ -19,7 +20,7 @@ import {
   Sphere,
 } from './definitions';
 
-const maxDepth = 36;
+const maxDepth = 5;
 const scale = 300;
 const planes: Plane[] = [
   {
@@ -28,13 +29,13 @@ const planes: Plane[] = [
     normal: [0, -1, 0],
     emission: [0, 0, 0],
     reflectivity: [1, 1, 1],
-    roughness: 55,
+    roughness: 1,
   },
 ];
 const spheres: Sphere[] = [
   {
     type: 'sphere',
-    pos: [-1, 0, 1],
+    pos: [-0.5, 0, 3],
     radius: 0.2,
     emission: [0, 0, 0],
     reflectivity: [0.5, 0.5, 0.5],
@@ -42,15 +43,15 @@ const spheres: Sphere[] = [
   },
   {
     type: 'sphere',
-    pos: [1, 0, 1],
+    pos: [0, 0, 3],
     radius: 0.2,
     emission: [0, 0, 0],
-    reflectivity: [0.8, 0, 0],
+    reflectivity: [0.4, 0, 0],
     roughness: 1,
   },
   {
     type: 'sphere',
-    pos: [0, 5, 14],
+    pos: [0, 5, 10],
     radius: 0.3,
     emission: [0.5, 0.5, 0.5],
     reflectivity: [1, 1, 1],
@@ -192,14 +193,13 @@ function planeIntersection(ray: Ray, plane: Plane): IntersectionResult {
   };
 }
 
-function getRandomUnitVector(dir) {
+function getRandomUnitVector(normal) {
   const x = Math.random() * 2 - 1;
   const y = Math.random() * 2 - 1;
   const z = Math.random() * 2 - 1;
-  let vector = [x, y, z];
-  const d = dotProduct(vector, dir);
-  if (d < 0) {
-    vector = multiplyVectorByScalar(vector, -1);
-  }
-  return normalize(vector);
+  let direction = [x, y, z];
+  const d = dotProduct(normal, direction);
+  const s = sign(d);
+  direction = multiply(normal, multiplyVectorByScalar(direction, s));
+  return normalize(direction);
 }
