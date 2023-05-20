@@ -2,8 +2,8 @@
 import './style.css';
 import { createDrawer } from './drawer.ts';
 import { shaderFn } from './shader';
-const height = 250;
-const width = 250;
+const height = 200;
+const width = 200;
 
 const canvas: HTMLCanvasElement = document.getElementById(
   'canvas'
@@ -33,9 +33,11 @@ let start,
 start = 0;
 previousTimeStamp = 0;
 function animate() {
+  // drawer.shader(shaderFn);
+}
+for (let i = 0; i < 500; i++) {
   drawer.shader(shaderFn);
 }
-
 function step(timestampMs: number) {
   const elapsed = timestampMs - start;
   previousTimeStamp = elapsed;

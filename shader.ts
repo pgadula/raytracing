@@ -38,8 +38,8 @@ const spheres: Sphere[] = [
     type: 'sphere',
     pos: [-0.5, 0, 0],
     radius: 0.2,
-    emission: [0, 0, 0],
-    reflectivity: [0.8, 0.5, 0.5],
+    emission: [0.3, 0, 0],
+    reflectivity: [0.5, 0.5, 0.5],
     roughness: 1,
     reflectionStrength: 0.5,
   },
@@ -50,7 +50,7 @@ const spheres: Sphere[] = [
     emission: [0, 0, 0],
     reflectivity: [0.5, 0, 0],
     roughness: 1,
-    reflectionStrength: 0.2,
+    reflectionStrength: 0.3,
   },
   {
     type: 'sphere',
@@ -59,7 +59,7 @@ const spheres: Sphere[] = [
     emission: [1, 1, 1],
     reflectivity: [1, 1, 1],
     roughness: 1,
-    reflectionStrength: 0.2,
+    reflectionStrength: 0.3,
   },
 ];
 const objects3d: Array<Object3d> = [
