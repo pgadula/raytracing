@@ -20,7 +20,7 @@ import {
   Sphere,
 } from './definitions';
 
-const maxDepth = 16;
+const maxDepth = 4;
 const scale = 100;
 const planes: Plane[] = [
   {

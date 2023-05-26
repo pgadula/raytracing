@@ -1,9 +1,9 @@
 // Import stylesheets
 import './style.css';
-import { createDrawer } from './drawer.ts';
+import { createDrawer } from './drawer';
 import { shaderFn } from './shader';
-const height = 200;
-const width = 200;
+const height = 50;
+const width = 50;
 
 const canvas: HTMLCanvasElement = document.getElementById(
   'canvas'
