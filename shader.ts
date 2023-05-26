@@ -23,7 +23,7 @@ import {
 import { intetarion } from '.';
 
 const maxDepth = 3;
-const scale = intetarion;
+const scale = 2;
 const planes: Plane[] = [
   {
     type: 'plane',
@@ -69,18 +69,16 @@ const cubes: Cube[] = [
   {
     type: 'cube',
     pos: [0, 0, 5],
-    size: [0.4, 4, -5],
-    emission: [0, 0.3, 0],
+    size: [2666, 772, 772],
+    emission: [5, 5, 5],
     reflectivity: [1, 1, 1],
     roughness: 1,
     reflectionStrength: 1,
   },
 ];
-const objects3d: Array<Object3d> = [
-  ...spheres.sort((a, b) => b.pos[2] - a.pos[2]),
-  ...planes,
-  ...cubes,
-];
+const objects3d: Array<Object3d> = [...spheres, ...planes, ...cubes].sort(
+  (a, b) => b.pos[2] - a.pos[2]
+);
 const camera: Camera = {
   pos: [0, 0, -1],
   fov: 90,

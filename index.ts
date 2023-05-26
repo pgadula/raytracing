@@ -4,7 +4,7 @@ import { createDrawer } from './drawer';
 import { shaderFn } from './shader';
 const height = 200;
 const width = 200;
-export const intetarion = 100;
+export const numberOfInteration = 100;
 const canvas: HTMLCanvasElement = document.getElementById(
   'canvas'
 ) as HTMLCanvasElement;
@@ -35,7 +35,7 @@ previousTimeStamp = 0;
 function animate() {
   // drawer.shader(shaderFn);
 }
-for (let i = 0; i < intetarion; i++) {
+for (let i = 0; i < numberOfInteration; i++) {
   drawer.shader(shaderFn);
 }
 function step(timestampMs: number) {
