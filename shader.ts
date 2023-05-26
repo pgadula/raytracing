@@ -1,4 +1,4 @@
-import { PixelShaderFn } from './drawer';
+import { PixelShaderProgram } from './drawer';
 import {
   addVectors,
   dotProduct,
@@ -13,15 +13,17 @@ import {
 } from './vector';
 import {
   Camera,
+  Cube,
   IntersectionResult,
   Object3d,
   Plane,
   Ray,
   Sphere,
 } from './definitions';
+import { intetarion } from '.';
 
-const maxDepth = 4;
-const scale = 100;
+const maxDepth = 3;
+const scale = intetarion;
 const planes: Plane[] = [
   {
     type: 'plane',
@@ -62,16 +64,34 @@ const spheres: Sphere[] = [
     reflectionStrength: 0.3,
   },
 ];
+
+const cubes: Cube[] = [
+  {
+    type: 'cube',
+    pos: [0, 0, 5],
+    size: [0.4, 4, -5],
+    emission: [0, 0.3, 0],
+    reflectivity: [1, 1, 1],
+    roughness: 1,
+    reflectionStrength: 1,
+  },
+];
 const objects3d: Array<Object3d> = [
   ...spheres.sort((a, b) => b.pos[2] - a.pos[2]),
   ...planes,
+  ...cubes,
 ];
 const camera: Camera = {
   pos: [0, 0, -1],
   fov: 90,
   focalLength: 0.5,
 };
-export const shaderFn: PixelShaderFn = (color, coord, resolution, mouse) => {
+export const shaderFn: PixelShaderProgram = (
+  color,
+  coord,
+  resolution,
+  mouse
+) => {
   const max_x = resolution[0] - 1;
   const max_y = resolution[1] - 1;
   const aspectRatio = resolution[0] / resolution[1];
@@ -108,6 +128,9 @@ function trace(ray: Ray, depth: number, objects: Object3d[]): Vector3 {
         break;
       case 'plane':
         intersectionResult = planeIntersection(ray, object);
+        break;
+      case 'cube':
+        intersectionResult = cubeIntersection(ray, object);
         break;
     }
 
@@ -210,4 +233,61 @@ function getRandomUnitVector(normal) {
   const s = sign(d);
   direction = multiply(normal, multiplyVectorByScalar(direction, s));
   return normalize(direction);
+}
+
+function cubeIntersection(ray: Ray, cube: Cube): IntersectionResult {
+  const [originX, originY, originZ] = ray.origin;
+  const [directionX, directionY, directionZ] = ray.direction;
+  const [cubePosX, cubePosY, cubePosZ] = cube.pos;
+  const [sizeX, sizeY, sizeZ] = cube.size;
+
+  // Calculate the minimum and maximum intersection distances for each axis
+  const tMinX = (cubePosX - originX) / directionX;
+  const tMaxX = (cubePosX + sizeX - originX) / directionX;
+  const tMinY = (cubePosY - originY) / directionY;
+  const tMaxY = (cubePosY + sizeY - originY) / directionY;
+  const tMinZ = (cubePosZ - originZ) / directionZ;
+  const tMaxZ = (cubePosZ + sizeZ - originZ) / directionZ;
+
+  // Calculate the minimum and maximum intersection distances overall
+  const tMin = Math.max(
+    Math.max(Math.min(tMinX, tMaxX), Math.min(tMinY, tMaxY)),
+    Math.min(tMinZ, tMaxZ)
+  );
+  const tMax = Math.min(
+    Math.min(Math.max(tMinX, tMaxX), Math.max(tMinY, tMaxY)),
+    Math.max(tMinZ, tMaxZ)
+  );
+
+  // Check if there is a valid intersection
+  if (tMax < 0 || tMin > tMax) {
+    return null;
+  }
+
+  // Calculate the intersection point
+  const intersectionPoint = addVectors(
+    ray.origin,
+    multiplyVectorByScalar(ray.direction, tMin)
+  ) as Vector3;
+
+  // Calculate the normal at the intersection point
+  let normal: Vector3 = [0, 0, 0];
+  if (Math.abs(intersectionPoint[0] - cubePosX) < 0.0001) {
+    normal = [-1, 0, 0];
+  } else if (Math.abs(intersectionPoint[0] - (cubePosX + sizeX)) < 0.0001) {
+    normal = [1, 0, 0];
+  } else if (Math.abs(intersectionPoint[1] - cubePosY) < 0.0001) {
+    normal = [0, -1, 0];
+  } else if (Math.abs(intersectionPoint[1] - (cubePosY + sizeY)) < 0.0001) {
+    normal = [0, 1, 0];
+  } else if (Math.abs(intersectionPoint[2] - cubePosZ) < 0.0001) {
+    normal = [0, 0, -1];
+  } else if (Math.abs(intersectionPoint[2] - (cubePosZ + sizeZ)) < 0.0001) {
+    normal = [0, 0, 1];
+  }
+
+  return {
+    point: intersectionPoint,
+    normal: normalize(normal) as Vector3,
+  };
 }

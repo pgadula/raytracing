@@ -19,7 +19,17 @@ export interface Sphere {
   roughness: number;
   reflectionStrength: number;
 }
-export type Object3d = Sphere | Plane;
+
+export interface Cube {
+  type: 'cube';
+  pos: Vector3;
+  size: Vector3;
+  emission: Vector3;
+  reflectivity: Vector3;
+  roughness: number;
+  reflectionStrength: number;
+}
+export type Object3d = Sphere | Plane | Cube;
 
 interface Intersection {
   point: Vector3;

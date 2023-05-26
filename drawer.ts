@@ -1,6 +1,6 @@
 import { Vector2, Vector3, Vector4 } from './vector';
 
-export type PixelShaderFn = (
+export type PixelShaderProgram = (
   fragColor: Vector4,
   fragCoord: Vector2,
   viewport: Vector2,
@@ -32,7 +32,7 @@ function fragmentProgramFactor(
   size: Vector2,
   mouse: Vector2
 ) {
-  return (fn: PixelShaderFn) => {
+  return (fn: PixelShaderProgram) => {
     for (let y = 0; y < size[1]; y++) {
       for (let x = 0; x < size[0]; x++) {
         if (x === 0) {
