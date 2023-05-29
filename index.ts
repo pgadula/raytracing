@@ -33,11 +33,10 @@ let start,
 start = 0;
 previousTimeStamp = 0;
 function animate() {
-  // drawer.shader(shaderFn);
-}
-for (let i = 0; i < numberOfInteration; i++) {
   drawer.shader(shaderFn);
 }
+// for (let i = 0; i < numberOfInteration; i++) {
+// }
 function step(timestampMs: number) {
   const elapsed = timestampMs - start;
   previousTimeStamp = elapsed;

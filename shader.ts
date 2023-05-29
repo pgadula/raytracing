@@ -11,60 +11,59 @@ import {
 } from './definitions';
 import { Vec3, vec3 } from 'wgpu-matrix';
 
-const maxDepth = 16;
+const maxDepth = 8;
 const scale = 5;
 const camera: Camera = {
   pos: [0, 0, -1],
-  fov: 90,
+  fov: 80,
   focalLength: 0.55,
 };
-const planes: Plane[] = [
-  {
-    type: 'plane',
-    pos: [0, 0.5, 0],
-    normal: [0, -1, 0],
-    emission: [0, 0, 0],
-    reflectivity: [0.5, 0.5, 0.5],
-    roughness: 1,
-    reflectionStrength: 0.1,
-  },
-  {
-    type: 'plane',
-    pos: [0, -0.5, 0],
-    normal: [0, 1, 0],
-    emission: [0, 0, 0],
-    reflectivity: [0.5, 0.5, 0.5],
-    roughness: 1,
-    reflectionStrength: 0.1,
-  },
-];
+const planes: Plane[] = [];
 const spheres: Sphere[] = [
   {
     type: 'sphere',
-    pos: [-0.5, 0, 0.5],
+    pos: [-0.5, 0, 1],
     radius: 0.2,
-    emission: [0, 0, 0],
-    reflectivity: [1, 1, 1],
-    roughness: 0,
+    emission: [1, 1, 1],
+    reflectivity: [0, 1, 1],
+    roughness: 0.0001,
     reflectionStrength: 0.1,
   },
   {
     type: 'sphere',
     pos: [1.5, 0, 1],
     radius: 0.3,
-    emission: [0, 0, 0],
+    emission: [1, 0, 0],
     reflectivity: [1, 1, 1],
-    roughness: 0,
+    roughness: 0.1,
     reflectionStrength: 0.1,
   },
   {
     type: 'sphere',
-    pos: [0, 8, 10],
+    pos: [0, 1, 1],
     radius: 0.5,
-    emission: [1, 1, 1],
-    reflectivity: [0, 0, 0],
-    roughness: 1,
-    reflectionStrength: 0,
+    emission: [0, 1, 0],
+    reflectivity: [1, 0, 1],
+    roughness: 0.0001,
+    reflectionStrength: 0.1,
+  },
+  {
+    type: 'sphere',
+    pos: [1, -2, 2],
+    radius: 0.3,
+    emission: [1, 1, 0],
+    reflectivity: [0, 1, 1],
+    roughness: 0.0001,
+    reflectionStrength: 0.1,
+  },
+  {
+    type: 'sphere',
+    pos: [1, 0.5, 0.5],
+    radius: 0.3,
+    emission: [1, 1, 0],
+    reflectivity: [0, 1, 1],
+    roughness: 0.0001,
+    reflectionStrength: 0.1,
   },
 ];
 
