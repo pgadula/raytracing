@@ -20,70 +20,79 @@ import {
   Ray,
   Sphere,
 } from './definitions';
-import { intetarion } from '.';
 
-const maxDepth = 3;
-const scale = 2;
+const maxDepth = 16;
+const scale = 5;
+const camera: Camera = {
+  pos: [0, 0, -1],
+  fov: 90,
+  focalLength: 0.55,
+};
 const planes: Plane[] = [
   {
     type: 'plane',
-    pos: [0, 1, 0],
+    pos: [0, 0.5, 0],
     normal: [0, -1, 0],
     emission: [0, 0, 0],
-    reflectivity: [1, 1, 1],
+    reflectivity: [0.5, 0.5, 0.5],
     roughness: 1,
-    reflectionStrength: 0.5,
+    reflectionStrength: 0.1,
+  },
+  {
+    type: 'plane',
+    pos: [0, -0.5, 0],
+    normal: [0, 1, 0],
+    emission: [0, 0, 0],
+    reflectivity: [0.5, 0.5, 0.5],
+    roughness: 1,
+    reflectionStrength: 0.1,
   },
 ];
 const spheres: Sphere[] = [
   {
     type: 'sphere',
-    pos: [-0.5, 0, 0],
+    pos: [-0.5, 0, 0.5],
     radius: 0.2,
-    emission: [0.3, 0, 0],
-    reflectivity: [0.5, 0.5, 0.5],
-    roughness: 1,
-    reflectionStrength: 0.5,
+    emission: [0, 0, 0],
+    reflectivity: [1, 1, 1],
+    roughness: 0,
+    reflectionStrength: 0.1,
   },
   {
     type: 'sphere',
-    pos: [0, 0, 0],
-    radius: 0.2,
+    pos: [1.5, 0, 1],
+    radius: 0.3,
     emission: [0, 0, 0],
-    reflectivity: [0.5, 0, 0],
-    roughness: 1,
-    reflectionStrength: 0.3,
+    reflectivity: [1, 1, 1],
+    roughness: 0,
+    reflectionStrength: 0.1,
   },
   {
     type: 'sphere',
     pos: [0, 8, 10],
-    radius: 0.3,
+    radius: 0.5,
     emission: [1, 1, 1],
-    reflectivity: [1, 1, 1],
+    reflectivity: [0, 0, 0],
     roughness: 1,
-    reflectionStrength: 0.3,
+    reflectionStrength: 0,
   },
 ];
 
 const cubes: Cube[] = [
-  {
-    type: 'cube',
-    pos: [0, 0, 5],
-    size: [2666, 772, 772],
-    emission: [5, 5, 5],
-    reflectivity: [1, 1, 1],
-    roughness: 1,
-    reflectionStrength: 1,
-  },
+  // {
+  //   type: 'cube',
+  //   pos: [0, 0, 5],
+  //   size: [2666, 772, 772],
+  //   emission: [5, 5, 5],
+  //   reflectivity: [1, 1, 1],
+  //   roughness: 1,
+  //   reflectionStrength: 1,
+  // },
 ];
 const objects3d: Array<Object3d> = [...spheres, ...planes, ...cubes].sort(
   (a, b) => b.pos[2] - a.pos[2]
 );
-const camera: Camera = {
-  pos: [0, 0, -1],
-  fov: 90,
-  focalLength: 0.5,
-};
+
 export const shaderFn: PixelShaderProgram = (
   color,
   coord,
