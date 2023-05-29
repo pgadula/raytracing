@@ -24,7 +24,7 @@ const planes: Plane[] = [
     emission: [0, 0, 0],
     normal: [0, -1, 0],
     pos: [0, 5, 0],
-    reflectionStrength: 1,
+    reflectionStrength: 0.5,
     reflectivity: [1, 1, 1],
     roughness: 0.01,
     type: 'plane',
@@ -55,7 +55,7 @@ const spheres: Sphere[] = [
     radius: 0.5,
     emission: [0, 1, 1],
     reflectivity: [1, 0, 1],
-    roughness: 0.01,
+    roughness: 0.001,
     reflectionStrength: 1,
   },
   {

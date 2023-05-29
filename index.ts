@@ -2,8 +2,8 @@
 import './style.css';
 import { createDrawer } from './drawer';
 import { shaderFn } from './shader';
-const height = 200;
-const width = 200;
+const height = 800;
+const width = 800;
 export const numberOfInteration = 10;
 const canvas: HTMLCanvasElement = document.getElementById(
   'canvas'
@@ -33,7 +33,7 @@ let start,
 start = 0;
 previousTimeStamp = 0;
 function animate() {
-  drawer.shader(shaderFn);
+  // drawer.shader(shaderFn);
 }
 drawer.shader(shaderFn);
 
