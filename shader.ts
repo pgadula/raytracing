@@ -11,75 +11,66 @@ import {
 } from './definitions';
 import { Vec3, vec3 } from 'wgpu-matrix';
 
-const maxDepth = 8;
-const scale = 5;
+const maxDepth = 9;
+const numberOfRays = 10;
+
 const camera: Camera = {
   pos: [0, 0, -1],
   fov: 80,
   focalLength: 0.55,
 };
-const planes: Plane[] = [];
+const planes: Plane[] = [
+  {
+    emission: [0, 0, 0],
+    normal: [0, -1, 0],
+    pos: [0, 5, 0],
+    reflectionStrength: 1,
+    reflectivity: [1, 1, 1],
+    roughness: 0.01,
+    type: 'plane',
+  },
+];
 const spheres: Sphere[] = [
   {
     type: 'sphere',
-    pos: [-0.5, 0, 1],
-    radius: 0.2,
-    emission: [1, 1, 1],
-    reflectivity: [0, 1, 1],
-    roughness: 0.0001,
-    reflectionStrength: 0.1,
-  },
-  {
-    type: 'sphere',
-    pos: [1.5, 0, 1],
-    radius: 0.3,
-    emission: [1, 0, 0],
-    reflectivity: [1, 1, 1],
-    roughness: 0.1,
-    reflectionStrength: 0.1,
-  },
-  {
-    type: 'sphere',
-    pos: [0, 1, 1],
+    pos: [-1.5, 1, 0.5],
     radius: 0.5,
-    emission: [0, 1, 0],
+    emission: [1, 0, 1],
+    reflectivity: [1, 1, 1],
+    roughness: 0.01,
+    reflectionStrength: 1,
+  },
+  {
+    type: 'sphere',
+    pos: [2, -1, 2],
+    radius: 0.5,
+    emission: [0, 0, 0],
+    reflectivity: [0, 0, 1],
+    roughness: 0.01,
+    reflectionStrength: 1,
+  },
+  {
+    type: 'sphere',
+    pos: [0, -1, 2],
+    radius: 0.5,
+    emission: [0, 1, 1],
     reflectivity: [1, 0, 1],
-    roughness: 0.0001,
-    reflectionStrength: 0.1,
+    roughness: 0.01,
+    reflectionStrength: 1,
   },
   {
     type: 'sphere',
-    pos: [1, -2, 2],
+    pos: [0, 0.5, 0.5],
     radius: 0.3,
-    emission: [1, 1, 0],
-    reflectivity: [0, 1, 1],
-    roughness: 0.0001,
-    reflectionStrength: 0.1,
-  },
-  {
-    type: 'sphere',
-    pos: [1, 0.5, 0.5],
-    radius: 0.3,
-    emission: [1, 1, 0],
-    reflectivity: [0, 1, 1],
-    roughness: 0.0001,
-    reflectionStrength: 0.1,
+    emission: [1, 1, 1],
+    reflectivity: [1, 1, 1],
+    roughness: 0.01,
+    reflectionStrength: 1,
   },
 ];
-
-const cubes: Cube[] = [
-  // {
-  //   type: 'cube',
-  //   pos: [0, 0, 5],
-  //   size: [2666, 772, 772],
-  //   emission: [5, 5, 5],
-  //   reflectivity: [1, 1, 1],
-  //   roughness: 1,
-  //   reflectionStrength: 1,
-  // },
-];
+const cubes: Cube[] = [];
 const objects3d: Array<Object3d> = [...spheres, ...planes, ...cubes].sort(
-  (a, b) => b.pos[2] - a.pos[2]
+  (a, b) => a.pos[2] - b.pos[2]
 );
 
 export const shaderFn: PixelShaderProgram = (
@@ -111,9 +102,13 @@ export const shaderFn: PixelShaderProgram = (
     direction,
     origin: camera.pos,
   };
-  const tracedColor = trace(ray, maxDepth, objects3d);
-  const newColor = vec3.mulScalar(tracedColor, 1 / scale);
-  return vec3.add(color, newColor);
+  const results = [];
+  for (let i = 0; i < numberOfRays; i++) {
+    const tracedColor = trace(ray, maxDepth, objects3d);
+    results.push(tracedColor);
+  }
+  const newColor = results.reduce((c, p) => vec3.add(c, p), [0, 0, 0]);
+  return vec3.divScalar(newColor, numberOfRays);
 };
 function trace(ray: Ray, depth: number, objects: Object3d[]): Vec3 {
   for (let object of objects) {
