@@ -1,16 +1,5 @@
 import { PixelShaderProgram } from './drawer';
-import {
-  addVectors,
-  dotProduct,
-  magnitude,
-  multiply,
-  multiplyVectorByScalar,
-  normalize,
-  sign,
-  subtractVectors,
-  Vector3,
-  Vector4,
-} from './vector';
+import { sign, Vector3 } from './vector';
 import {
   Camera,
   Cube,
@@ -20,6 +9,7 @@ import {
   Ray,
   Sphere,
 } from './definitions';
+import { Vec3, vec3 } from 'wgpu-matrix';
 
 const maxDepth = 16;
 const scale = 5;
@@ -113,20 +103,20 @@ export const shaderFn: PixelShaderProgram = (
   const halfWidth = aspectRatio * halfHeight;
 
   // Calculate the direction vector
-  const direction = normalize([
+  const direction = vec3.normalize([
     ndcX * halfWidth,
     ndcY * halfHeight,
     -camera.focalLength,
-  ]) as Vector3;
+  ]);
   const ray: Ray = {
     direction,
     origin: camera.pos,
   };
   const tracedColor = trace(ray, maxDepth, objects3d);
-  const newColor = multiplyVectorByScalar(tracedColor, 1 / scale) as Vector3;
-  return addVectors(color, newColor) as Vector3;
+  const newColor = vec3.mulScalar(tracedColor, 1 / scale);
+  return vec3.add(color, newColor);
 };
-function trace(ray: Ray, depth: number, objects: Object3d[]): Vector3 {
+function trace(ray: Ray, depth: number, objects: Object3d[]): Vec3 {
   for (let object of objects) {
     let intersectionResult: IntersectionResult;
     switch (object.type) {
@@ -148,7 +138,7 @@ function trace(ray: Ray, depth: number, objects: Object3d[]): Vector3 {
           origin: intersectionResult.point,
           direction: intersectionResult.normal,
         };
-        let reflectedColor = multiply(
+        let reflectedColor = vec3.multiply(
           trace(
             newRay,
             depth - 1,
@@ -156,11 +146,11 @@ function trace(ray: Ray, depth: number, objects: Object3d[]): Vector3 {
           ),
           object.reflectivity
         );
-        reflectedColor = multiplyVectorByScalar(
+        reflectedColor = vec3.mulScalar(
           reflectedColor,
           object.reflectionStrength
         );
-        emission = addVectors(emission, reflectedColor) as Vector3;
+        emission = vec3.add(emission, reflectedColor);
       }
 
       return emission;
@@ -171,9 +161,9 @@ function trace(ray: Ray, depth: number, objects: Object3d[]): Vector3 {
 }
 
 function sphereIntersection(ray: Ray, sphere: Sphere): IntersectionResult {
-  const sphereToOrigin = subtractVectors(ray.origin, sphere.pos);
-  const projection = dotProduct(sphereToOrigin, ray.direction);
-  const distance = magnitude(sphereToOrigin) - projection;
+  const sphereToOrigin = vec3.sub(ray.origin, sphere.pos);
+  const projection = vec3.dot(sphereToOrigin, ray.direction);
+  const distance = vec3.len(sphereToOrigin) - projection;
 
   const radiusSquared = sphere.radius * sphere.radius;
   if (distance > radiusSquared) {
@@ -181,16 +171,16 @@ function sphereIntersection(ray: Ray, sphere: Sphere): IntersectionResult {
   }
 
   const offset = Math.sqrt(radiusSquared - distance * distance);
-  const intersection = addVectors(
+  const intersection = vec3.add(
     ray.origin,
-    multiplyVectorByScalar(ray.direction, projection - offset)
-  ) as Vector3;
-  let roughness = multiplyVectorByScalar(
+    vec3.mulScalar(ray.direction, projection - offset)
+  );
+  let roughness = vec3.mulScalar(
     getRandomUnitVector(ray.direction),
     sphere.roughness
-  ) as Vector3;
-  let normal = normalize(subtractVectors(intersection, ray.origin)) as Vector3;
-  normal = addVectors(normal, roughness) as Vector3;
+  );
+  let normal = vec3.normalize(vec3.sub(intersection, ray.origin));
+  normal = vec3.add(normal, roughness);
   return {
     point: intersection,
     normal,
@@ -198,32 +188,30 @@ function sphereIntersection(ray: Ray, sphere: Sphere): IntersectionResult {
 }
 
 function planeIntersection(ray: Ray, plane: Plane): IntersectionResult {
-  const dotProductResult = dotProduct(plane.normal, ray.direction);
+  const dotProductResult = vec3.dot(plane.normal, ray.direction);
 
   if (Math.abs(dotProductResult) < 0.01) {
     return null;
   }
 
   const t =
-    dotProduct(subtractVectors(plane.pos, ray.origin), plane.normal) /
-    dotProduct(ray.direction, plane.normal);
+    vec3.dot(vec3.sub(plane.pos, ray.origin), plane.normal) /
+    vec3.dot(ray.direction, plane.normal);
 
   if (t < 0) {
     return null; // Intersection point is behind the ray's origin
   }
 
-  const intersectionPoint = addVectors(
+  const intersectionPoint = vec3.add(
     ray.origin,
-    multiplyVectorByScalar(ray.direction, t)
-  ) as Vector3;
-  let roughness = multiplyVectorByScalar(
+    vec3.mulScalar(ray.direction, t)
+  ) as Vec3;
+  let roughness = vec3.mulScalar(
     getRandomUnitVector(ray.direction),
     plane.roughness
-  ) as Vector3;
-  let normal = normalize(
-    subtractVectors(intersectionPoint, ray.origin)
-  ) as Vector3;
-  normal = addVectors(normal, roughness) as Vector3;
+  );
+  let normal = vec3.normalize(vec3.sub(intersectionPoint, ray.origin));
+  normal = vec3.add(normal, roughness);
 
   return {
     point: intersectionPoint,
@@ -235,11 +223,12 @@ function getRandomUnitVector(normal) {
   const x = Math.random() * 2 - 1;
   const y = Math.random() * 2 - 1;
   const z = Math.random() * 2 - 1;
-  let direction = [x, y, z];
-  const d = dotProduct(normal, direction);
+
+  let direction = vec3.random();
+  const d = vec3.dot(normal, direction);
   const s = sign(d);
-  direction = multiply(normal, multiplyVectorByScalar(direction, s));
-  return normalize(direction);
+  direction = vec3.mul(normal, vec3.mulScalar(direction, s));
+  return vec3.normalize(direction);
 }
 
 function cubeIntersection(ray: Ray, cube: Cube): IntersectionResult {
@@ -272,10 +261,10 @@ function cubeIntersection(ray: Ray, cube: Cube): IntersectionResult {
   }
 
   // Calculate the intersection point
-  const intersectionPoint = addVectors(
+  const intersectionPoint = vec3.add(
     ray.origin,
-    multiplyVectorByScalar(ray.direction, tMin)
-  ) as Vector3;
+    vec3.mulScalar(ray.direction, tMin)
+  );
 
   // Calculate the normal at the intersection point
   let normal: Vector3 = [0, 0, 0];
@@ -295,6 +284,6 @@ function cubeIntersection(ray: Ray, cube: Cube): IntersectionResult {
 
   return {
     point: intersectionPoint,
-    normal: normalize(normal) as Vector3,
+    normal: vec3.normalize(normal) as Vector3,
   };
 }

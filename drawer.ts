@@ -1,3 +1,4 @@
+import { Vec3 } from 'wgpu-matrix';
 import { Vector2, Vector3, Vector4 } from './vector';
 
 export type PixelShaderProgram = (
@@ -5,7 +6,7 @@ export type PixelShaderProgram = (
   fragCoord: Vector2,
   viewport: Vector2,
   mouse: Vector2
-) => Vector3;
+) => Vec3;
 
 const drawSphereFactor =
   (pixels: Uint8ClampedArray, size: Vector2) =>
