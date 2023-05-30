@@ -1,5 +1,5 @@
 import { PixelShaderProgram } from './drawer';
-import { sign, Vector3 } from './vector';
+import { sign } from './vector';
 import {
   Camera,
   Cube,
@@ -11,8 +11,8 @@ import {
 } from './definitions';
 import { Vec3, vec3 } from 'wgpu-matrix';
 
-const maxDepth = 26;
-const numberOfRays = 3;
+const maxDepth = 5;
+const numberOfRays = 9;
 
 const camera: Camera = {
   pos: [0, 0, -1],
@@ -22,9 +22,9 @@ const camera: Camera = {
 const planes: Plane[] = [
   {
     emission: [0, 0, 0],
-    normal: [0, -1, 0],
+    normal: [0, 1, 0],
     pos: [0, 5, 0],
-    reflectionStrength: 0.5,
+    reflectionStrength: 1,
     reflectivity: [1, 1, 1],
     roughness: 0.01,
     type: 'plane',
@@ -42,26 +42,26 @@ const spheres: Sphere[] = [
   },
   {
     type: 'sphere',
-    pos: [2, -1, 2],
+    pos: [1.5, 1, 0],
     radius: 0.5,
     emission: [0, 0, 0],
-    reflectivity: [0, 0, 1],
-    roughness: 0.01,
-    reflectionStrength: 1,
-  },
-  {
-    type: 'sphere',
-    pos: [0, -1, 2],
-    radius: 0.5,
-    emission: [0, 1, 1],
-    reflectivity: [1, 0, 1],
+    reflectivity: [0.5, 0.5, 0.5],
     roughness: 0.001,
     reflectionStrength: 1,
   },
   {
     type: 'sphere',
-    pos: [0, 0.5, 0.5],
+    pos: [0, 1, 1],
     radius: 0.3,
+    emission: [0, 0, 0],
+    reflectivity: [0.2, 0.6, 1],
+    roughness: 0.001,
+    reflectionStrength: 1,
+  },
+  {
+    type: 'sphere',
+    pos: [0, 0, -2],
+    radius: 0.5,
     emission: [1, 1, 1],
     reflectivity: [1, 1, 1],
     roughness: 0.01,
@@ -70,7 +70,7 @@ const spheres: Sphere[] = [
 ];
 const cubes: Cube[] = [];
 const objects3d: Array<Object3d> = [...spheres, ...planes, ...cubes].sort(
-  (a, b) => a.pos[2] - b.pos[2]
+  (a, b) => b.pos[2] - a.pos[2]
 );
 
 export const shaderFn: PixelShaderProgram = (
@@ -214,10 +214,6 @@ function planeIntersection(ray: Ray, plane: Plane): IntersectionResult {
 }
 
 function getRandomUnitVector(normal) {
-  const x = Math.random() * 2 - 1;
-  const y = Math.random() * 2 - 1;
-  const z = Math.random() * 2 - 1;
-
   let direction = vec3.random();
   const d = vec3.dot(normal, direction);
   const s = sign(d);
@@ -261,7 +257,7 @@ function cubeIntersection(ray: Ray, cube: Cube): IntersectionResult {
   );
 
   // Calculate the normal at the intersection point
-  let normal: Vector3 = [0, 0, 0];
+  let normal: Vec3 = [0, 0, 0];
   if (Math.abs(intersectionPoint[0] - cubePosX) < 0.0001) {
     normal = [-1, 0, 0];
   } else if (Math.abs(intersectionPoint[0] - (cubePosX + sizeX)) < 0.0001) {
@@ -278,6 +274,6 @@ function cubeIntersection(ray: Ray, cube: Cube): IntersectionResult {
 
   return {
     point: intersectionPoint,
-    normal: vec3.normalize(normal) as Vector3,
+    normal: vec3.normalize(normal) as Vec3,
   };
 }

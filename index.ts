@@ -4,7 +4,6 @@ import { createDrawer } from './drawer';
 import { shaderFn } from './shader';
 const height = 800;
 const width = 800;
-export const numberOfInteration = 10;
 const canvas: HTMLCanvasElement = document.getElementById(
   'canvas'
 ) as HTMLCanvasElement;
