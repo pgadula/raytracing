@@ -11,73 +11,21 @@ import {
 } from './definitions';
 import { Vec3, vec3 } from 'wgpu-matrix';
 
-const maxDepth = 5;
-const numberOfRays = 9;
+const maxDepth = 3;
+const numberOfRays = 2;
 
 const camera: Camera = {
   pos: [0, 0, -1],
   fov: 80,
   focalLength: 0.55,
 };
-const planes: Plane[] = [
-  {
-    emission: [0, 0, 0],
-    normal: [0, 1, 0],
-    pos: [0, 5, 0],
-    reflectionStrength: 1,
-    reflectivity: [1, 1, 1],
-    roughness: 0.01,
-    type: 'plane',
-  },
-];
-const spheres: Sphere[] = [
-  {
-    type: 'sphere',
-    pos: [-1.5, 1, 0.5],
-    radius: 0.5,
-    emission: [1, 0, 1],
-    reflectivity: [1, 1, 1],
-    roughness: 0.01,
-    reflectionStrength: 1,
-  },
-  {
-    type: 'sphere',
-    pos: [1.5, 1, 0],
-    radius: 0.5,
-    emission: [0, 0, 0],
-    reflectivity: [0.5, 0.5, 0.5],
-    roughness: 0.001,
-    reflectionStrength: 1,
-  },
-  {
-    type: 'sphere',
-    pos: [0, 1, 1],
-    radius: 0.3,
-    emission: [0, 0, 0],
-    reflectivity: [0.2, 0.6, 1],
-    roughness: 0.001,
-    reflectionStrength: 1,
-  },
-  {
-    type: 'sphere',
-    pos: [0, 0, -2],
-    radius: 0.5,
-    emission: [1, 1, 1],
-    reflectivity: [1, 1, 1],
-    roughness: 0.01,
-    reflectionStrength: 1,
-  },
-];
-const cubes: Cube[] = [];
-const objects3d: Array<Object3d> = [...spheres, ...planes, ...cubes].sort(
-  (a, b) => b.pos[2] - a.pos[2]
-);
 
-export const shaderFn: PixelShaderProgram = (
+export const shaderFn: PixelShaderProgram<Object3d[]> = (
   color,
   coord,
   resolution,
-  mouse
+  mouse,
+  date
 ) => {
   const max_x = resolution[0] - 1;
   const max_y = resolution[1] - 1;
@@ -104,7 +52,7 @@ export const shaderFn: PixelShaderProgram = (
   };
   const results = [];
   for (let i = 0; i < numberOfRays; i++) {
-    const tracedColor = trace(ray, maxDepth, objects3d);
+    const tracedColor = trace(ray, maxDepth, date);
     results.push(tracedColor);
   }
   const newColor = results.reduce((c, p) => vec3.add(c, p), [0, 0, 0]);
@@ -136,7 +84,7 @@ function trace(ray: Ray, depth: number, objects: Object3d[]): Vec3 {
           trace(
             newRay,
             depth - 1,
-            objects3d.filter((x) => x != object)
+            objects.filter((x) => x != object)
           ),
           object.reflectivity
         );

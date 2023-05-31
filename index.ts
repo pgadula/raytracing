@@ -2,19 +2,25 @@
 import './style.css';
 import { createDrawer } from './drawer';
 import { shaderFn } from './shader';
-const height = 400;
-const width = 400;
+import { Cube, Object3d, Plane, Sphere } from './definitions';
+const height = 250;
+const width = 250;
 const canvas: HTMLCanvasElement = document.getElementById(
   'canvas'
 ) as HTMLCanvasElement;
 const fpsElement: HTMLSpanElement = document.getElementById(
   'fps'
 ) as HTMLSpanElement;
+const renderButton: HTMLButtonElement = document.getElementById(
+  'render'
+) as HTMLButtonElement;
 //setup
 canvas.height = height;
 canvas.width = width;
 let ms = [0, 0];
-
+renderButton.addEventListener('click', () => {
+  shaderRunner(shaderFn);
+});
 canvas.addEventListener('mousemove', (m) => {
   const x = (m.x / width) * -4 - 1;
   const y = (m.y / height) * -4 - 1;
@@ -31,11 +37,63 @@ let start,
   frames = 0;
 start = 0;
 previousTimeStamp = 0;
-function animate() {
-  // drawer.shader(shaderFn);
-}
-drawer.shader(shaderFn);
 
+const planes: Plane[] = [
+  {
+    emission: [0, 0, 0],
+    normal: [0, 1, 0],
+    pos: [0, 5, 0],
+    reflectionStrength: 1,
+    reflectivity: [1, 1, 1],
+    roughness: 0.01,
+    type: 'plane',
+  },
+];
+const spheres: Sphere[] = [
+  {
+    type: 'sphere',
+    pos: [-1.5, 1, 0.5],
+    radius: 0.5,
+    emission: [1, 0, 1],
+    reflectivity: [1, 1, 1],
+    roughness: 0.01,
+    reflectionStrength: 1,
+  },
+  {
+    type: 'sphere',
+    pos: [1.5, 1, 0],
+    radius: 0.5,
+    emission: [0, 0, 0],
+    reflectivity: [0.5, 0.5, 0.5],
+    roughness: 0.001,
+    reflectionStrength: 1,
+  },
+  {
+    type: 'sphere',
+    pos: [0, 1, 1],
+    radius: 0.3,
+    emission: [0, 0, 0],
+    reflectivity: [0.2, 0.6, 1],
+    roughness: 0.001,
+    reflectionStrength: 1,
+  },
+  {
+    type: 'sphere',
+    pos: [0, 0, -2],
+    radius: 0.5,
+    emission: [1, 1, 1],
+    reflectivity: [1, 1, 1],
+    roughness: 0.01,
+    reflectionStrength: 1,
+  },
+];
+const cubes: Cube[] = [];
+const objects3d: Array<Object3d> = [...spheres, ...planes, ...cubes].sort(
+  (a, b) => b.pos[2] - a.pos[2]
+);
+
+let shaderRunner = drawer.shader(objects3d);
+function animate() {}
 function step(timestampMs: number) {
   const elapsed = timestampMs - start;
   previousTimeStamp = elapsed;

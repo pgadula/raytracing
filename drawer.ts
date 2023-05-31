@@ -66,5 +66,5 @@ export const createDrawer = (
   mouse: Vector2
 ) => ({
   drawSphere: drawSphereFactor(pixels, size),
-  shader: fragmentProgramFactor(pixels, size, mouse),
+  shader: (data) => fragmentProgramFactor(pixels, size, mouse, data),
 });
