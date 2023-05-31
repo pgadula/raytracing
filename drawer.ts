@@ -1,11 +1,12 @@
 import { Vec3 } from 'wgpu-matrix';
 import { Vector2, Vector3, Vector4 } from './vector';
 
-export type PixelShaderProgram = (
+export type PixelShaderProgram<T> = (
   fragColor: Vector4,
   fragCoord: Vector2,
   viewport: Vector2,
-  mouse: Vector2
+  mouse: Vector2,
+  data: T
 ) => Vec3;
 
 const drawSphereFactor =
@@ -28,12 +29,13 @@ const drawSphereFactor =
       }
     }
   };
-function fragmentProgramFactor(
+function fragmentProgramFactor<T>(
   pixels: Uint8ClampedArray,
   size: Vector2,
-  mouse: Vector2
+  mouse: Vector2,
+  data: T
 ) {
-  return (fn: PixelShaderProgram) => {
+  return (fn: PixelShaderProgram<T>) => {
     for (let y = 0; y < size[1]; y++) {
       for (let x = 0; x < size[0]; x++) {
         if (x === 0) {
@@ -48,7 +50,7 @@ function fragmentProgramFactor(
         ];
 
         const fragCoord: Vector2 = [x, y];
-        const result = fn(fragColor, fragCoord, size, mouse);
+        const result = fn(fragColor, fragCoord, size, mouse, data);
         pixels[index] = result[0] * 255;
         pixels[index + 1] = result[1] * 255;
         pixels[index + 2] = result[2] * 255;

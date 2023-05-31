@@ -2,8 +2,8 @@
 import './style.css';
 import { createDrawer } from './drawer';
 import { shaderFn } from './shader';
-const height = 300;
-const width = 300;
+const height = 400;
+const width = 400;
 const canvas: HTMLCanvasElement = document.getElementById(
   'canvas'
 ) as HTMLCanvasElement;
