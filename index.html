@@ -1,2 +1,27 @@
 <canvas id="canvas"></canvas>
-<p>fps: <span id="fps"></span></p>
+<div>
+  <p>fps: <span id="fps"></span></p>
+  <h3>Scene</h3>
+  <ul></ul>
+</div>
+<form>
+  <fieldset>
+    <legend>Sphere:</legend>
+    <fieldset>
+      <label for="color">color</label>
+      <input type="color" />
+      <label for="emission">emission</label>
+      <input type="color" />
+      <label for="roughness">roughness</label>
+      <input step="0.1" type="number" />
+    </fieldset>
+    <fieldset>
+      <label for="x">position x</label>
+      <input step="0.1" type="number" />
+      <label for="y">position y</label>
+      <input step="0.1" type="number" />
+      <label for="z">position z</label>
+      <input step="0.1" type="number" />
+    </fieldset>
+  </fieldset>
+</form>
