@@ -11,8 +11,8 @@ import {
 } from './definitions';
 import { Vec3, vec3 } from 'wgpu-matrix';
 
-const maxDepth = 3;
-const numberOfRays = 2;
+const maxDepth = 6;
+const numberOfRays = 5;
 
 const camera: Camera = {
   pos: [0, 0, -1],
